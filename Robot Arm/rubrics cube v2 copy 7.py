@@ -145,11 +145,18 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Apply a threshold to get a binary image
+    # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
+    # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
     _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
+
+    # Display the filtered image in a separate window for debugging
+    cv2.imshow('Filtered Image', binary)
 
     # Apply morphological operations to clean up the binary image
     kernel = np.ones((3, 3), np.uint8)
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
+
 
 
     def angle_between_vectors(v1, v2):
@@ -179,7 +186,7 @@ while True:
                     v2 = p3 - p2
                     angle = angle_between_vectors(v1, v2)
                     angles.append(angle)
-                if all(88 <= angle <= 92 for angle in angles):  # Adjust this threshold as needed
+                if all(80 <= angle <= 100 for angle in angles):  # Adjust this threshold as needed
                     # Get the center of the rectangle
                     M = cv2.moments(approx)
                     if M['m00'] != 0:
