@@ -39,13 +39,32 @@ import matplotlib.pyplot as plt
 
 
 # Define the RGB values for the colors
+# colors_rgb = {
+#     'orange': (255, 158, 99),
+#     'yellow': (250, 224, 141),
+#     'green': (80, 140, 80),
+#     'blue': (16, 48, 243),
+#     'white': (170, 160, 200)
+# }
+
+
+# colors_rgb = {
+#     'orange':  (255, 158, 99),
+#     'yellow': (255, 255, 0),
+#     'green': (0, 128, 0),
+#     'blue': (0, 0, 255),
+#     'white': (255, 255, 255)
+# }
+
 colors_rgb = {
-    'orange': (255, 158, 99),
-    'yellow': (250, 224, 141),
-    'green': (80, 140, 80),
-    'blue': (16, 48, 243),
-    'white': (170, 160, 200)
+    'orange':  (216, 114, 95),
+    'yellow': (173, 189, 106),
+    'green': (0, 128, 0),
+    'blue': (29, 75, 128),
+    'white': (191, 193, 184)
 }
+
+
 
 # Convert RGB to HSV
 def convert_rgb_to_hsv(rgb):
@@ -66,9 +85,11 @@ for color_name, rgb in colors_rgb.items():
     upper = np.array([min(hsv[0] + hue_range, 180), min(hsv[1] + saturation_range, 255), min(hsv[2] + value_range, 255)])
     colors_hsv[color_name] = [{'lower': lower, 'upper': upper}]
 
+rgb_color = np.uint8([[[177, 48, 48]]])
+
 # Add the predefined red ranges
-colors_hsv['red'] = [{'lower': np.array([170, 150, 150]), 'upper': np.array([180, 255, 255])},
-                     {'lower': np.array([0, 150, 150]), 'upper': np.array([10, 255, 255])}]
+colors_hsv['red'] = [{'lower': np.array([140, 20, 20]), 'upper': np.array([200, 70, 70])} ] #,
+                    # {'lower': np.array([0, 20, 20]), 'upper': np.array([20,  70, 70])}]
 
 # Print the HSV ranges
 for color_name, hsv_range in colors_hsv.items():
