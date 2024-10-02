@@ -88,8 +88,8 @@ for color_name, rgb in colors_rgb.items():
 rgb_color = np.uint8([[[177, 48, 48]]])
 
 # Add the predefined red ranges
-colors_hsv['red'] = [{'lower': np.array([140, 20, 20]), 'upper': np.array([200, 70, 70])} ] #,
-                    # {'lower': np.array([0, 20, 20]), 'upper': np.array([20,  70, 70])}]
+colors_hsv['red'] = [{'lower': np.array([140, 20, 20]), 'upper': np.array([200, 70, 70])} ,
+                     {'lower': np.array([0, 20, 20]), 'upper': np.array([20,  70, 70])}]
 
 # Print the HSV ranges
 for color_name, hsv_range in colors_hsv.items():
@@ -148,7 +148,16 @@ while True:
     # Apply a threshold to get a binary image
     # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
     # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
-    _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY_INV)
+    binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Extract the V (value) channel
+    v_channel = hsv[:, :, 2]
+
+    # Apply a threshold to the V channel to get a binary image
+    _, binary = cv2.threshold(v_channel, 60, 255, cv2.THRESH_BINARY_INV)
 
     # Display the filtered image in a separate window for debugging
     cv2.imshow('Filtered Image', binary)
@@ -157,7 +166,54 @@ while True:
     kernel = np.ones((3, 3), np.uint8)
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
 
+    # Initialize variables to store the largest square contour
+    big_square_contour = None
+    max_area_found = 0
 
+    for color_name, color_ranges in colors.items():
+        mask = None
+        for color_range in color_ranges:
+            lower = color_range['lower']
+            upper = color_range['upper']
+            curr_mask = cv2.inRange(hsv, lower, upper)
+            if mask is None:
+                mask = curr_mask
+            else:
+                mask = cv2.bitwise_or(mask, curr_mask)
+        # Apply morphological operations to clean up the mask
+        kernel = np.ones((3, 3), np.uint8)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        # Find contours
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:
+            # Approximate contour
+            epsilon = 0.05 * cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, epsilon, True)
+            # If the contour has 4 sides, it could be a square
+            if len(approx) == 4 and cv2.isContourConvex(approx):
+                # Compute area and check if it's within the big square area range
+                area = cv2.contourArea(approx)
+                if 10000 <= area <= 20000:
+                    if area > max_area_found:
+                        max_area_found = area
+                        big_square_contour = approx
+
+    if big_square_contour is not None:
+        # Create a mask with the same dimensions as the frame, initialized to black
+        mask = np.zeros_like(frame)
+        # Fill the detected big square contour on the mask with white
+        cv2.fillPoly(mask, [big_square_contour], (255, 255, 255))
+        # Apply the mask to the frame using bitwise AND
+        masked_frame = cv2.bitwise_and(frame, mask)
+        
+        # Optionally, draw the big square contour on the masked frame for visualization
+        cv2.drawContours(masked_frame, [big_square_contour], -1, (0, 255, 0), 2)
+        
+        # Display the masked frame
+        cv2.imshow('Masked Frame', masked_frame)
+    else:
+        # If no big square is detected, display a black frame or the original frame
+        cv2.imshow('Masked Frame', np.zeros_like(frame))
 
 
     def angle_between_vectors(v1, v2):
@@ -197,8 +253,8 @@ while True:
                         cv2.drawContours(mask, [approx], -1, (255, 255, 255), thickness=cv2.FILLED)
                         cv2.circle(frame, (cx, cy), 5, (0, 0, 0), -1)
                         found_cube = True
-    frame = cv2.bitwise_and(frame, mask)
-    if found_cube:
+    #frame = cv2.bitwise_and(frame, mask)
+    if True:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         squares = []
 
@@ -225,7 +281,7 @@ while True:
                 if len(approx) == 4 and cv2.isContourConvex(approx):
                     # Compute area and check if it's large enough
                     area = cv2.contourArea(approx)
-                    if area > 3000 and area < 8000:  # Adjust this threshold as needed
+                    if area > 3000 and area < 15000:  # Adjust this threshold as needed
                         # Get the center of the square
                         M = cv2.moments(approx)
                         if M['m00'] != 0:
