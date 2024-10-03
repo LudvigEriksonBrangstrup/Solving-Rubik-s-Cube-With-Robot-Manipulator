@@ -147,14 +147,14 @@ def main():
     cube.update_face('U', new_up)
     
     # Define a new 3x3 matrix for the Left ('L') face
-    new_left = [
-        ['g', 'g', 'r'],
-        ['g', 'g', 'g'],
-        ['g', 'y', 'g']
-    ]
+    # new_left = [
+    #     ['g', 'g', 'r'],
+    #     ['g', 'g', 'g'],
+    #     ['g', 'y', 'g']
+    # ]
     
     # Update the Left face
-    cube.update_face('L', new_left)
+    # cube.update_face('L', new_left)
     
     # Define a new 3x3 matrix for the Right ('R') face
     new_right = [
@@ -176,15 +176,15 @@ def main():
     # Update the Back face
     cube.update_face('B', new_back)
     
-    # Define a new 3x3 matrix for the Down ('D') face
-    new_down = [
-        ['y', 'y', 'g'],
-        ['y', 'y', 'y'],
-        ['y', 'r', 'y']
-    ]
+    # # Define a new 3x3 matrix for the Down ('D') face
+    # new_down = [
+    #     ['y', 'y', 'g'],
+    #     ['y', 'y', 'y'],
+    #     ['y', 'r', 'y']
+    # ]
     
-    # Update the Down face
-    cube.update_face('D', new_down)
+    # # Update the Down face
+    # cube.update_face('D', new_down)
 
 
     # new_front = [

@@ -28,7 +28,7 @@ class RubiksCube:
         # Initialize a separate face notation matrix
         self.face_notation_matrix = np.full((9, 12), None, dtype=object)
     
-    def print_matrix(self):
+    def print_matrix(self) -> None:
         """
         Print the current state of the Rubik's Cube in a 9x12 matrix format.
         """
@@ -51,7 +51,7 @@ class RubiksCube:
             print("\t".join(row))
         print("\n")
     
-    def update_face(self, side, new_matrix):
+    def update_face(self, side: str, new_matrix: list) -> None:
         """
         Update a specific face of the Rubik's Cube with a new 3x3 matrix.
         
@@ -69,7 +69,7 @@ class RubiksCube:
         # Update the face with the new values
         self.faces[side] = np.array(new_matrix, dtype=object)
     
-    def get_matrix(self):
+    def get_matrix(self) -> dict:
         """
         Get a copy of the current state of the Rubik's Cube faces.
         
@@ -77,7 +77,7 @@ class RubiksCube:
         """
         return {face: self.faces[face].copy() for face in self.faces}
     
-    def update_face_notation_matrix(self):
+    def update_face_notation_matrix(self) -> None:
         """
         Convert the color notation to the face notation based on the color in the middle position of each face.
         """
@@ -87,21 +87,21 @@ class RubiksCube:
             middle_color = matrix[1][1]
             if middle_color is not None:
                 color_to_face[middle_color] = face
-        
+    
         # Reset the face_notation_matrix
         self.face_notation_matrix[:] = "None"
-        
-        # Define face positions in the 9x12 matrix
-
-        
+    
         # Populate the face_notation_matrix with face notations
         for face, (start_row, start_col) in self.face_positions.items():
             for i in range(3):
                 for j in range(3):
                     color = self.faces[face][i][j]
-                    self.face_notation_matrix[start_row + i][start_col + j] = color_to_face.get(color, color)
+                    if color is not None:
+                        self.face_notation_matrix[start_row + i][start_col + j] = color_to_face.get(color, color)
+                    else:
+                        self.face_notation_matrix[start_row + i][start_col + j] = "None"
     
-    def print_output_matrix(self):
+    def print_output_matrix(self) -> None:
         """
         Print the output matrix which contains the face notation.
         """
@@ -110,7 +110,7 @@ class RubiksCube:
             print("\t".join([elem if elem is not None else "None" for elem in row]))
         print("\n")
     
-    def get_face_notation_string(self):
+    def get_face_notation_string(self) -> str:
         """
         Get the face notation string in the format UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB.
         
@@ -132,23 +132,82 @@ if __name__ == "__main__":
     cube = RubiksCube()
     
     # Initialize each face with a color (e.g., 'W' for white, 'R' for red, etc.)
-    cube.update_face('U', [['W']*3 for _ in range(3)])
-    cube.update_face('L', [['O']*3 for _ in range(3)])
-    cube.update_face('F', [['G']*3 for _ in range(3)])
-    cube.update_face('R', [['R']*3 for _ in range(3)])
-    cube.update_face('B', [['B']*3 for _ in range(3)])
-    cube.update_face('D', [['Y']*3 for _ in range(3)])
+    # cube.update_face('U', [['w']*3 for _ in range(3)])
+    # cube.update_face('L', [['o']*3 for _ in range(3)])
+    # cube.update_face('F', [['g']*3 for _ in range(3)])
+    # cube.update_face('R', [['r']*3 for _ in range(3)])
+    # cube.update_face('B', [['b']*3 for _ in range(3)])
+    # cube.update_face('D', [['y']*3 for _ in range(3)])
+
+    # # Print the current matrix
+    # cube.print_matrix()
     
-    # Print the current matrix
-    cube.print_matrix()
-    
-    # Update a specific face
+    # # Update a specific face
     new_front = [
-        ['G', 'G', 'G'],
-        ['G', 'G', 'G'],
-        ['G', 'G', 'G']
+        ['r', 'r', 'g'],
+        ['r', 'g', 'r'],
+        ['b', 'r', 'r']
     ]
     cube.update_face('F', new_front)
+
+
+    new_front = [
+        ['r', 'r', 'g'],
+        ['r', 'r', 'r'],
+        ['b', 'r', 'r']
+    ]
+    
+    # Update the Front face
+    cube.update_face('F', new_front)
+    
+    # Define a new 3x3 matrix for the Up ('U') face
+    new_up = [
+        ['w', 'w', 'o'],
+        ['w', 'w', 'w'],
+        ['w', 'b', 'w']
+    ]
+    
+    # Update the Up face
+    cube.update_face('U', new_up)
+    
+    # Define a new 3x3 matrix for the Left ('L') face
+    new_left = [
+        ['g', 'g', 'r'],
+        ['g', 'g', 'g'],
+        ['g', 'y', 'g']
+    ]
+    
+    # Update the Left face
+    cube.update_face('L', new_left)
+    
+    # Define a new 3x3 matrix for the Right ('R') face
+    new_right = [
+        ['b', 'b', 'w'],
+        ['b', 'b', 'b'],
+        ['r', 'b', 'b']
+    ]
+    
+    # Update the Right face
+    cube.update_face('R', new_right)
+    
+    # Define a new 3x3 matrix for the Back ('B') face
+    new_back = [
+        ['o', 'o', 'b'],
+        ['o', 'o', 'o'],
+        ['o', 'w', 'o']
+    ]
+    
+    # Update the Back face
+    cube.update_face('B', new_back)
+
+    new_down = [
+        ['y', 'y', 'g'],
+        ['y', 'y', 'y'],
+        ['y', 'r', 'y']
+    ]
+
+    # Update the Down face
+    cube.update_face('D', new_down)
     
     # Update and print face notation matrix
     cube.update_face_notation_matrix()
