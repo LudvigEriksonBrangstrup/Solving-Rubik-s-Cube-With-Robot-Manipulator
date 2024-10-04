@@ -46,6 +46,18 @@ rubiks_cube = RubiksCube()
 # ]
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # # Update a specific face
 new_front = [
     ['r', 'r', 'g'],
@@ -117,6 +129,15 @@ new_down = [
 rubiks_cube.update_face('D', new_down)
 
 
+# # Initialize each face with a color (e.g., 'W' for white, 'R' for red, etc.)
+# rubiks_cube.update_face('U', [['w']*3 for _ in range(3)])
+# rubiks_cube.update_face('L', [['o']*3 for _ in range(3)])
+# rubiks_cube.update_face('F', [['r']*3 for _ in range(3)])
+# rubiks_cube.update_face('R', [['g']*3 for _ in range(3)])
+# rubiks_cube.update_face('B', [['b']*3 for _ in range(3)])
+# rubiks_cube.update_face('D', [['y']*3 for _ in range(3)])
+
+
 rubiks_cube.print_matrix()
 
 # Update and print face notation matrix
@@ -126,3 +147,8 @@ rubiks_cube.print_output_matrix()
 # Get face notation string
 notation_str = rubiks_cube.get_face_notation_string()
 print(f"Face Notation String: {notation_str}")
+
+
+
+# UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB
+# UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB

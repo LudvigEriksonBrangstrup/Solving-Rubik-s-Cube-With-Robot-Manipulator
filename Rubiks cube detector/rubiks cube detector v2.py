@@ -61,13 +61,13 @@ from scipy import ndimage
 # }
 
 
-colors_rgb = {
-    'orange':  (216, 114, 95),
-    'yellow': (173, 189, 106),
-    'green': (0, 128, 0),
-    'blue': (29, 75, 128),
-    'white': (191, 193, 184)
-}
+# colors_rgb = {
+#     'orange':  (216, 114, 95),
+#     'yellow': (173, 189, 106),
+#     'green': (0, 128, 0),
+#     'blue': (29, 75, 128),
+#     'white': (191, 193, 184)
+# }
 
 
 colors_rgb = {
@@ -157,10 +157,34 @@ if not cap.isOpened():
 plt.ion()
 fig, ax = plt.subplots()
 
+
+
+def crop_center(frame, crop_size):
+    """
+    Crop the center of the frame to the specified crop size.
+    
+    :param frame: The input frame (image) to be cropped.
+    :param crop_size: The size of the cropped region (width and height).
+    :return: The cropped frame.
+    """
+    height, width = frame.shape[:2]
+    center_x, center_y = width // 2, height // 2
+    half_crop_size = crop_size // 2
+    
+    start_x = max(center_x - half_crop_size, 0)
+    start_y = max(center_y - half_crop_size, 0)
+    end_x = min(center_x + half_crop_size, width)
+    end_y = min(center_y + half_crop_size, height)
+    
+    cropped_frame = frame[start_y:end_y, start_x:end_x]
+    return cropped_frame
+
+
 while True:
     # Capture frame-by-frame
     found_cube = False
     ret, frame = cap.read()
+    frame = frame[200:800, 400:1000]
     if not ret:
         print("Can't receive frame. Exiting ...")
         break
@@ -170,13 +194,16 @@ while True:
 
     height, width, _ = frame.shape
 
+    frame
+
     # Convert to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('gray image', gray)
 
     # Apply a threshold to get a binary image
     # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
     # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
-    _, binary = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY_INV)
+    # _, binary = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY_INV)
     binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -190,9 +217,11 @@ while True:
     # Display the filtered image in a separate window for debugging
     cv2.imshow('Filtered Image', binary)
 
-    # Apply morphological operations to clean up the binary image
-    kernel = np.ones((3, 3), np.uint8)
-    binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+    # # Apply morphological operations to clean up the binary image
+    # kernel = np.ones((3, 3), np.uint8)
+    # binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
+    cv2.imshow('Morphed Image', binary)
 
 
 
@@ -234,6 +263,10 @@ while True:
                         cv2.drawContours(mask, [approx], -1, (255, 255, 255), thickness=cv2.FILLED)
                         #cv2.circle(frame, (cx, cy), 5, (0, 0, 0), -1)
                         found_cube = True
+                        # show the amsk
+                        cv2.imshow('mask', mask)
+
+
     #frame = cv2.bitwise_and(frame, mask)
     if True:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -262,7 +295,7 @@ while True:
                 if len(approx) == 4 and cv2.isContourConvex(approx):
                     # Compute area and check if it's large enough
                     area = cv2.contourArea(approx)
-                    if area > 1000 and area < 15000:  # Adjust this threshold as needed
+                    if area > 200 and area < 15000:  # Adjust this threshold as needed
                         # Get the center of the square
                         M = cv2.moments(approx)
                         if M['m00'] != 0:
@@ -647,7 +680,7 @@ while True:
                     filtered_points.append(square)
         
             # Check if there are at least 6 points within the distance and area criteria
-            if len(filtered_points) == 9:
+            if len(filtered_points) >= 7:
                 return filtered_points
         
             raise ValueError("No suitable points found within the distance and area criteria")
@@ -670,12 +703,20 @@ while True:
             color = color_map_matplotlib[square['color']]
             ax.scatter(cx, cy, c=color, s=100, marker='o')
 
+
+        # Figur 1
+
+        
         # Set plot limits and grid
         ax.set_xlim(0, width)
         ax.set_ylim(height, 0)  # Invert y-axis to match image coordinates
         ax.grid(True)
         plt.draw()
         plt.pause(0.001)
+
+
+        # Tar ut ut färgerna och plottar dom i guit som heter Rubricks cube grid
+
 
         # If we have enough squares, perform clustering
         if len(squares) >= 6:
