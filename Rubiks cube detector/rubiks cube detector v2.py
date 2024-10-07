@@ -149,9 +149,18 @@ color_map_matplotlib = {
 # Start video capture
 cap = cv2.VideoCapture(0)
 
+# Check if the camera opened successfully
 if not cap.isOpened():
-    print("Cannot open camera")
+    print("Error: Could not open video capture.")
     exit()
+
+# # Disable auto-exposure
+# cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.05)  # 0.25 to enable manual exposure control
+
+# # Set a fixed brightness level (value between 0 and 1)
+# fixed_brightness = 0.05  # Adjust this value as needed
+# cap.set(cv2.CAP_PROP_BRIGHTNESS, fixed_brightness)
+
 
 # Initialize matplotlib
 plt.ion()
@@ -184,7 +193,11 @@ while True:
     # Capture frame-by-frame
     found_cube = False
     ret, frame = cap.read()
-    #frame = frame[200:800, 400:1000]
+    frame = frame[0:-1, 400:-1]
+
+    # brightness_factor = 1 # Adjust this value to reduce brightness
+    # frame = cv2.convertScaleAbs(frame, alpha=brightness_factor, beta=0)
+
     if not ret:
         print("Can't receive frame. Exiting ...")
         break
@@ -203,8 +216,9 @@ while True:
     # Apply a threshold to get a binary image
     # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
     # _, binary = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
-    # _, binary = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY_INV)
-    binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+    # 
+    #_, binary = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY_INV)
+    # binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 20, 5)
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -212,7 +226,7 @@ while True:
     v_channel = hsv[:, :, 2]
 
     # Apply a threshold to the V channel to get a binary image
-    _, binary = cv2.threshold(v_channel, 40, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(v_channel, 120, 255, cv2.THRESH_BINARY_INV)
 
     # Display the filtered image in a separate window for debugging
     cv2.imshow('Filtered Image', binary)
@@ -267,8 +281,10 @@ while True:
                         cv2.imshow('mask', mask)
 
 
-    #frame = cv2.bitwise_and(frame, mask)
-    if True:
+    frame = cv2.bitwise_and(frame, mask)
+    if found_cube:
+        brightness_factor = 0.8 # Adjust this value to reduce brightness
+        frame = cv2.convertScaleAbs(frame, alpha=brightness_factor, beta=0)
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         squares = []
 
@@ -295,7 +311,7 @@ while True:
                 if len(approx) == 4 and cv2.isContourConvex(approx):
                     # Compute area and check if it's large enough
                     area = cv2.contourArea(approx)
-                    if area > 200 and area < 15000:  # Adjust this threshold as needed
+                    if area > 200 and area < 30000:  # Adjust this threshold as needed
                         # Get the center of the square
                         M = cv2.moments(approx)
                         if M['m00'] != 0:
@@ -658,7 +674,7 @@ while True:
         
         def filter_closest_points(squares):
             # Check if there are at least 9 squares
-            if len(squares) < 9:
+            if len(squares) < 4:
                 raise ValueError("Not enough squares to filter 6-9 closest points")
         
             # Extract positions and areas from the squares dictionary
@@ -676,21 +692,21 @@ while True:
             for square in squares:
                 distance = np.linalg.norm(np.array(square['position']) - mean_point)
                 area_deviation = abs(square['area'] - mean_area) / mean_area
-                if distance <= 200 and area_deviation <= 0.2:
+                if distance <= 100000: #and area_deviation <= 0.2:
                     filtered_points.append(square)
         
             # Check if there are at least 6 points within the distance and area criteria
-            if len(filtered_points) >= 7:
+            if len(filtered_points) == 4:
                 return filtered_points
         
             raise ValueError("No suitable points found within the distance and area criteria")
         
-        # Example usage
-        try:
-            squares = filter_closest_points(squares)
-        except ValueError as e:
-            squares = []
-            print(e)
+        # # Example usage
+        # try:
+        #     squares = filter_closest_points(squares)
+        # except ValueError as e:
+        #     squares = []
+        #     print(e)
         
         
 
