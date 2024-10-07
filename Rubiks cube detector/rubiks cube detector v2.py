@@ -184,7 +184,7 @@ while True:
     # Capture frame-by-frame
     found_cube = False
     ret, frame = cap.read()
-    frame = frame[200:800, 400:1000]
+    #frame = frame[200:800, 400:1000]
     if not ret:
         print("Can't receive frame. Exiting ...")
         break
@@ -706,7 +706,7 @@ while True:
 
         # Figur 1
 
-        
+
         # Set plot limits and grid
         ax.set_xlim(0, width)
         ax.set_ylim(height, 0)  # Invert y-axis to match image coordinates
